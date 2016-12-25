@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org/DTD Mapper 3.0" 
+						"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.zgq.mapper.UserMapper">
+	<!-- 根据Id查询User -->
+	<select id="selectById" resultType="User" parameterType="int">
+		select *
+		from user where id=#{id}
+	</select>
+
+	<!-- 查询所有User -->
+	<select id="selectAllUser" resultType="com.zgq.pojo.User">
+		select * from user
+	</select>
+
+	<!-- 根据名称模糊查询User -->
+	<select id="selectUserByName" parameterType="string" resultType="com.zgq.pojo.User">
+		select * from user where username like '%${value}%'
+	</select>
+
+	<!-- 插入一条记录 -->
+	<insert id="insertOneUser" parameterType="com.zgq.pojo.User">
+		insert into
+		user(username,sex) values(#{username},#{sex})
+	</insert>
+
+	<!-- 插入一条记录，获取id -->
+	<insert id="insertOneUserGetId" parameterType="com.zgq.pojo.User">
+		<!-- 获取插入成功记录的i的，自动封装到set到User对象里 -->
+		<selectKey keyProperty="id" resultType="int" order="AFTER">
+			SELECT
+			LAST_INSERT_ID()
+		</selectKey>
+		insert into
+		user(username,sex) values(#{username},#{sex})
+	</insert>
+
+	<!-- 批量插入 -->
+	<insert id="insertBatchUser" parameterType="list">
+		insert into user(username,sex) values
+		<foreach collection="list" item="item" separator=",">
+			(#{item.username},#{item.sex})
+		</foreach>
+	</insert>
+
+	<!-- 根据id修改数据 -->
+	<update id="updateUserByid" parameterType="com.zgq.pojo.User">
+		update user set
+		address=#{address} where id = #{id}
+	</update>
+
+	<!-- 使用包装pojo查询用户，适用于多表关联 -->
+	<select id="selectUserQueryVO" resultType="user"
+		parameterType="com.zgq.pojo.UserQueryVO">
+		select * from user where id = #{user.id} and username
+		like '%${user.username}%'
+	</select>
+	<!-- 使用hashmap类型查询 -->
+	<select id="selectUserByMap" parameterType="hashmap" resultType="user">
+		select * from user where id= #{id} and username like '%${username}%'
+	</select>
+
+	<!-- 查询用户总数 -->
+	<select id="selectUserCount" parameterType="user" resultType="int">
+		select count(1) from user where username like '%${username}%'
+	</select>
+
+	<resultMap type="com.zgq.pojo.User" id="UserRstMap">
+		<id column="id_" property="id" />
+		<result column="name" property="username" />
+	</resultMap>
+	<!-- resultMap查询出的结果字段名称和pojo不一致 -->
+	<select id="selectUserRstMap" resultMap="UserRstMap">
+		select id id_,username
+		name from user
+	</select>
+
+	<!-- SQL片段 -->
+	<sql id="where">
+		<if test="username!=null and username!=''">
+			AND username like '%${username}%'
+		</if>
+		<if test="sex != null and sex != ''">
+			AND sex=#{sex}
+		</if>
+	</sql>
+	<!-- 动态sql -->
+	<select id="selectUserByDyn" parameterType="user" resultType="user">
+		select * from user
+		<where>
+			<include refid="where"></include>
+		</where>
+	</select>
+	
+	<!-- foreach -->
+	<select id="selectUserByForeach" parameterType="list" resultType="user">
+		select * from user 
+		<if test="list != null and list.size>0">
+			<where>
+				<!-- AND id in  添加and和不添加and一样 -->
+				<foreach collection="list" item="id" open="AND id in (" close=")" separator=",">
+					#{id}
+				</foreach>
+			</where>
+		</if>
+	</select>
+</mapper>
