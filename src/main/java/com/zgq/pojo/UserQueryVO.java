@@ -16,7 +16,4 @@ public class UserQueryVO {
 	public String toString() {
 		return "UserQueryVO [user=" + user + "]";
 	}
-	
-	
-
 }
