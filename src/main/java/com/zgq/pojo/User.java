@@ -1,6 +1,7 @@
 package com.zgq.pojo;
 
 import java.util.Date;
+import java.util.List;
 
 public class User {
 
@@ -9,6 +10,15 @@ public class User {
 	private Date birthday;
 	private Integer sex;
 	private String address;
+	
+	private List<Orders> orderList;
+	
+	public List<Orders> getOrderList() {
+		return orderList;
+	}
+	public void setOrderList(List<Orders> orderList) {
+		this.orderList = orderList;
+	}
 	public Integer getId() {
 		return id;
 	}
@@ -36,13 +46,13 @@ public class User {
 	public String getAddress() {
 		return address;
 	}
+	public void setAddress(String address) {
+		this.address = address;
+	}
 	@Override
 	public String toString() {
 		return "User [id=" + id + ", username=" + username + ", birthday=" + birthday + ", sex=" + sex + ", address="
-				+ address + "]";
-	}
-	public void setAddress(String address) {
-		this.address = address;
+				+ address + ", orderList=" + orderList + "]";
 	}
 	
 }

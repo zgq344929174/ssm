@@ -4,6 +4,11 @@
   "http://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
 	<properties resource="jdbc.properties" />
+	<!-- 延迟加载 -->
+	<settings>
+		<setting name="lazyLoadingEnabled" value="true"/>
+		<setting name="aggressiveLazyLoading" value="false"/>
+	</settings>
 	<typeAliases>
 		<!-- <typeAlias type="com.zgq.pojo.User" alias="user" /> -->
 		<!-- 批量给包下面的pojo设置别名，规则类名首字母大小写都可以 -->

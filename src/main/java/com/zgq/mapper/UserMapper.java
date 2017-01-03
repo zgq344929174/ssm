@@ -3,8 +3,6 @@ package com.zgq.mapper;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.jws.soap.SOAPBinding.Use;
-
 import org.apache.ibatis.annotations.Select;
 import org.junit.Test;
 
