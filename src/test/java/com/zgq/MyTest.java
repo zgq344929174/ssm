@@ -6,12 +6,19 @@ import java.util.List;
 
 import org.apache.ibatis.session.SqlSession;
 import org.junit.Test;
+import org.mybatis.caches.ehcache.EhcacheCache;
 
 import com.alibaba.fastjson.JSON;
+import com.zgq.mapper.OrdersMapper;
 import com.zgq.mapper.UserMapper;
+import com.zgq.pojo.OrdersExt;
 import com.zgq.pojo.User;
 import com.zgq.pojo.UserQueryVO;
 import com.zgq.tools.DBUtils;
+
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.Element;
 
 public class MyTest {
 	// 使用xml
@@ -28,8 +35,16 @@ public class MyTest {
 	public void selectByIdforanno() {
 		SqlSession sqlSession = DBUtils.getSession();
 		UserMapper mapper = sqlSession.getMapper(UserMapper.class);
-		User user = mapper.selectByIdforanno(1);
-		System.out.println(user);
+		// 第一次查询
+		User user1 = mapper.selectByIdforanno(1);
+		System.out.println(user1);
+
+		// 更新id=1的用户，用于测试insert 、update后清空一级缓存
+		mapper.updateUserByid(user1);
+		sqlSession.commit();
+		// 第二次查询
+		User user2 = mapper.selectByIdforanno(1);
+		System.out.println(user2);
 		sqlSession.close();
 	}
 
@@ -156,22 +171,22 @@ public class MyTest {
 	 * 使用hashmap类型查询
 	 */
 	@Test
-	public void selectUserByMap(){
+	public void selectUserByMap() {
 		SqlSession sqlSession = DBUtils.getSession();
 		UserMapper mapper = sqlSession.getMapper(UserMapper.class);
 		HashMap map = new HashMap<String, Object>();
-		map.put("id",10);
+		map.put("id", 10);
 		map.put("username", "张三");
 		List<User> list = mapper.selectUserByMap(map);
 		System.out.println(list);
 		sqlSession.close();
 	}
-	
+
 	/**
 	 * 查询用户总数
 	 */
 	@Test
-	public void selectUserCount(){
+	public void selectUserCount() {
 		SqlSession sqlSession = DBUtils.getSession();
 		UserMapper mapper = sqlSession.getMapper(UserMapper.class);
 		User user = new User();
@@ -180,24 +195,24 @@ public class MyTest {
 		System.out.println(userCount);
 		sqlSession.close();
 	}
-	
+
 	/**
 	 * 使用resultMap定义查询结果列名称和pojo名称不一致
 	 */
 	@Test
-	public void selectUserRstMap(){
+	public void selectUserRstMap() {
 		SqlSession sqlSession = DBUtils.getSession();
 		UserMapper mapper = sqlSession.getMapper(UserMapper.class);
 		List<User> list = mapper.selectUserRstMap();
 		System.out.println(list);
 		sqlSession.close();
 	}
-	
+
 	/**
 	 * 动态sql应用
 	 */
 	@Test
-	public void selectUserByDyn(){
+	public void selectUserByDyn() {
 		SqlSession sqlSession = DBUtils.getSession();
 		UserMapper mapper = sqlSession.getMapper(UserMapper.class);
 		User user = new User();
@@ -207,12 +222,12 @@ public class MyTest {
 		System.out.println(list);
 		sqlSession.close();
 	}
-	
+
 	/**
 	 * foreach
 	 */
 	@Test
-	public void selectUserByForeach(){
+	public void selectUserByForeach() {
 		SqlSession sqlSession = DBUtils.getSession();
 		UserMapper mapper = sqlSession.getMapper(UserMapper.class);
 		List<Integer> list = new ArrayList<Integer>();
@@ -222,27 +237,51 @@ public class MyTest {
 		List<User> userlist = mapper.selectUserByForeach(list);
 		System.out.println(JSON.toJSONString(userlist));
 		sqlSession.close();
-		
-	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-}
 
+	}
+
+	/**
+	 * 测试二级缓存 config.xml 打开缓存 mapper.xml 设置开启缓存<cache /> User 序列化 implements
+	 * Serializable
+	 */
+	@Test
+	public void TwoCacheTest() {
+		SqlSession sqlSession1 = DBUtils.getSession();
+		SqlSession sqlSession2 = DBUtils.getSession();
+		SqlSession sqlSession3 = DBUtils.getSession();
+		SqlSession sqlSession4 = DBUtils.getSession();
+
+		UserMapper mapper1 = sqlSession1.getMapper(UserMapper.class);
+		UserMapper mapper2 = sqlSession2.getMapper(UserMapper.class);
+		UserMapper mapper3 = sqlSession3.getMapper(UserMapper.class);
+		OrdersMapper mapper = sqlSession4.getMapper(OrdersMapper.class);
+		List<OrdersExt> findOrdersAndUser = mapper.findOrdersAndUser();
+
+		User user1 = mapper1.selectById(1);
+//		System.out.println(user1);
+		// mapper1.updateUserByid(user1);
+		sqlSession1.close();
+		User user2 = mapper2.selectById(1);
+//		System.out.println(user2);
+		sqlSession2.close();
+		User user3 = mapper3.selectByIdforanno(10);
+//		System.out.println(user3);
+
+		sqlSession3.close();
+		sqlSession4.close();
+
+		//获取缓存中的内容
+		CacheManager instance = CacheManager.getInstance();
+		String[] cacheNames = instance.getCacheNames();
+		for(String cacheName:cacheNames ){
+			Cache cache = instance.getCache(cacheName);
+			System.out.println("========="+cacheName+"============");
+			List keys = cache.getKeys();
+			for(Object key:keys){
+				System.out.println(cache.get(key));
+			}
+			
+		}
+	}
+
+}

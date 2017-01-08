@@ -3,6 +3,8 @@
 						"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.zgq.mapper.UserMapper">
+	<!-- 开启本mapper 的二级缓存 -->
+	<cache type="org.mybatis.caches.ehcache.EhcacheCache"/>
 	<!-- 根据Id查询User -->
 	<select id="selectById" resultType="User" parameterType="int">
 		select *
@@ -45,7 +47,7 @@
 	</insert>
 
 	<!-- 根据id修改数据 -->
-	<update id="updateUserByid" parameterType="com.zgq.pojo.User">
+	<update id="updateUserByid" parameterType="com.zgq.pojo.User" flushCache="false">
 		update user set
 		address=#{address} where id = #{id}
 	</update>
@@ -92,14 +94,16 @@
 			<include refid="where"></include>
 		</where>
 	</select>
-	
+
 	<!-- foreach -->
-	<select id="selectUserByForeach" parameterType="list" resultType="user">
-		select * from user 
+	<select id="selectUserByForeach" parameterType="list"
+		resultType="user">
+		select * from user
 		<if test="list != null and list.size>0">
 			<where>
-				<!-- AND id in  添加and和不添加and一样 -->
-				<foreach collection="list" item="id" open="AND id in (" close=")" separator=",">
+				<!-- AND id in 添加and和不添加and一样 -->
+				<foreach collection="list" item="id" open="AND id in ("
+					close=")" separator=",">
 					#{id}
 				</foreach>
 			</where>
