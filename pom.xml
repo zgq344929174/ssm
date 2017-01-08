@@ -15,9 +15,15 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<version>1.8</version>
+		</dependency>
+		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>servlet-api</artifactId>
 			<version>2.5</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.mybatis</groupId>
@@ -141,9 +147,17 @@
 				<artifactId>tomcat7-maven-plugin</artifactId>
 				<version>2.2</version>
 				<configuration>
-					<url>http://localhost:8080/ssm</url> <!-- tomcat管理路径 -->
+					<port>8081</port>
+					<url>http://localhost:8081/ssm</url> <!-- tomcat管理路径 -->
 					<server>Tomcat7</server> <!-- 与settings.xml文件中Server的id相同 -->
-					<path>/</path> <!-- 应用的部署位置 -->
+					<path>/ssm</path> <!-- 应用的部署位置 -->
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<testFailureIgnore>true</testFailureIgnore>
 				</configuration>
 			</plugin>
 		</plugins>
