@@ -27,7 +27,7 @@ public interface UserMapper {
 
 	List<User> selectUserQueryVO(UserQueryVO userQueryVO);
 
-	List<User> selectUserByMap(HashMap map);
+	List<User> selectUserByMap(HashMap<?, ?> map);
 
 	int selectUserCount(User user);
 
